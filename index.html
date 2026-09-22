@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evolution Garage - DHL x Formula E</title>
+  </head>
+  <body>
+    <canvas id="webgl"></canvas>
+
+    <div id="ui-container">
+      <!-- Barra Superior -->
+      <header class="top-bar">
+        <div class="logo-box">
+          <span class="logo-dhl">DHL</span>
+          <span class="logo-fe">FORMULA E</span>
+        </div>
+        <div class="dot-matrix"></div>
+      </header>
+
+      <!-- ==============================================
+           VIEW 1: MODO SELEÇÃO INDIVIDUAL (DEFAULT)
+      =============================================== -->
+      <section id="single-view" class="view-mode active">
+        <div class="showcase-area">
+          <div class="view-frame">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+
+            <div class="view-meta">
+              <span id="car-season" class="season-tag">SEASON 13, IN SERVICE FROM 2026/27</span>
+              <h1 id="car-title">GEN4</h1>
+              <p id="car-dimensions" class="dimension-tag">5,540 mm long · true scale 1 px = 7.7 mm</p>
+            </div>
+
+            <button id="btn-prev" class="nav-arrow left interactive">&lt;</button>
+            <button id="btn-next" class="nav-arrow right interactive">&gt;</button>
+          </div>
+
+          <aside class="stats-panel interactive">
+            <div class="stats-header">
+              <span class="stats-title-bar">— STATS · <span id="stats-car-name">GEN4</span></span>
+              <span id="stats-index" class="stats-counter">05 / 06</span>
+            </div>
+            <div id="specs-list" class="specs-list"></div>
+            <button id="btn-add-compare" class="btn-compare-action interactive">
+              Add to compare
+            </button>
+          </aside>
+        </div>
+
+        <footer class="bottom-bar">
+          <div class="compare-tray-wrapper interactive">
+            <span id="tray-count" class="tray-label">COMPARE TRAY, 0 OF 2</span>
+            <div class="tray-slots">
+              <div id="slot-0" class="slot empty"><span>Empty<br/>slot 1</span></div>
+              <div id="slot-1" class="slot empty"><span>Empty<br/>slot 2</span></div>
+            </div>
+          </div>
+
+          <div class="selector-wrapper interactive">
+            <div class="selector-header">
+              <span>— SELECT VEHICLE</span>
+              <span id="selector-index">05 / 06</span>
+            </div>
+            <div id="vehicle-tabs" class="vehicle-tabs"></div>
+          </div>
+        </footer>
+      </section>
+
+      <!-- ==============================================
+           VIEW 2: MODO COMPARAÇÃO DIRETA (COMPARE VIEW)
+      =============================================== -->
+      <section id="compare-view" class="view-mode">
+        <!-- Viewport com as miras e os dois carros -->
+        <div class="compare-viewport">
+          <div class="corner tl"></div>
+          <div class="corner tr"></div>
+          <div class="corner bl"></div>
+          <div class="corner br"></div>
+
+          <!-- Metas Superiores Lado a Lado -->
+          <div class="compare-top-info">
+            <!-- Carro 1 -->
+            <div class="compare-card-meta">
+              <div class="meta-texts">
+                <span id="cmp-cat-1" class="season-tag">SEASON 13 RACE CAR</span>
+                <h2 id="cmp-title-1" class="cmp-title">GEN4</h2>
+                <p id="cmp-dim-1" class="dimension-tag">5,540 x 1,790 x 1,113 mm</p>
+              </div>
+              <button id="btn-swap-1" class="btn-swap interactive">Swap</button>
+            </div>
+
+            <!-- Carro 2 -->
+            <div class="compare-card-meta right">
+              <div class="meta-texts">
+                <span id="cmp-cat-2" class="season-tag">DHL DELIVERY FLEET</span>
+                <h2 id="cmp-title-2" class="cmp-title">Kia PV5 Cargo L2H1</h2>
+                <p id="cmp-dim-2" class="dimension-tag">4,695 x 1,895 x 1,923 mm</p>
+              </div>
+              <button id="btn-swap-2" class="btn-swap interactive">Swap</button>
+            </div>
+          </div>
+
+          <!-- Régua Métrica de Solo -->
+          <div class="metric-scale">
+            <div class="ruler-ticks">
+              <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
+              <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
+            </div>
+            <span class="scale-text">1 m grid · 1 m = 88 px · 1 px = 11.4 mm · both vehicles drawn from the same factor, nothing normalised</span>
+          </div>
+        </div>
+
+        <!-- Tabela Comparativa de Especificações -->
+        <div class="compare-table-container interactive">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th class="col-attr">ATTRIBUTE</th>
+                <th id="th-car-1" class="col-c1">GEN4</th>
+                <th id="th-car-2" class="col-c2">KIA PV5 CARGO</th>
+              </tr>
+            </thead>
+            <tbody id="compare-tbody">
+              <!-- Injetado via JS -->
+            </tbody>
+          </table>
+
+          <!-- Botões Swap em Mobile -->
+          <div class="mobile-swap-bar">
+            <button id="btn-swap-m1" class="btn-swap-mobile interactive">Swap</button>
+            <button id="btn-swap-m2" class="btn-swap-mobile interactive">Swap</button>
+          </div>
+        </div>
+
+        <button id="btn-exit-compare" class="btn-exit-compare interactive">✕ Back to Garage</button>
+      </section>
+
+      <!-- Triângulo Amarelo -->
+      <div class="yellow-triangle"></div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
