@@ -22,9 +22,16 @@
         <div class="dot-matrix"></div>
       </header>
 
-      <!-- VIEW 1: MODO SELEÇÃO INDIVIDUAL (DEFAULT) -->
-       
+      <!-- VIEW 1: MODO SELEÇÃO INDIVIDUAL -->
       <section id="single-view" class="view-mode active">
+        <!-- Seletor no topo para versão mobile -->
+        <div class="mobile-selector-top">
+          <div id="vehicle-tabs-mobile" class="vehicle-tabs"></div>
+          <button id="btn-toggle-compare-mobile" class="btn-compare-action interactive">
+            Add to compare
+          </button>
+        </div>
+
         <div class="showcase-area">
           <div class="view-frame" id="canvas-host-single">
             <div class="corner tl"></div>
@@ -35,6 +42,11 @@
             <div class="view-meta">
               <span id="car-season" class="season-tag">SEASON 13, IN SERVICE FROM 2026/27</span>
               <h1 id="car-title">GEN4</h1>
+              
+              <!-- Botão desktop posicionado abaixo do título -->
+              <button id="btn-toggle-compare-desktop" class="btn-compare-action desktop-compare-btn interactive">
+                Add to compare
+              </button>
             </div>
 
             <!-- Canvas Three.js confinado dentro do frame -->
@@ -50,32 +62,22 @@
               <span id="stats-index" class="stats-counter">05 / 06</span>
             </div>
             <div id="specs-list" class="specs-list"></div>
-            <button id="btn-add-compare" class="btn-compare-action interactive">
-              Add to compare
-            </button>
           </aside>
         </div>
 
-        <footer class="bottom-bar">
-          <div class="compare-tray-wrapper interactive">
-            <span id="tray-count" class="tray-label">COMPARE TRAY, 0 OF 2</span>
-            <div class="tray-slots">
-              <div id="slot-0" class="slot empty"><span>Empty<br/>slot 1</span></div>
-              <div id="slot-1" class="slot empty"><span>Empty<br/>slot 2</span></div>
-            </div>
-          </div>
-
+        <!-- Seletor na barra inferior para versão desktop -->
+        <footer class="bottom-bar desktop-bottom-bar">
           <div class="selector-wrapper interactive">
             <div class="selector-header">
               <span>— SELECT VEHICLE</span>
               <span id="selector-index">05 / 06</span>
             </div>
-            <div id="vehicle-tabs" class="vehicle-tabs"></div>
+            <div id="vehicle-tabs-desktop" class="vehicle-tabs"></div>
           </div>
         </footer>
       </section>
 
-      <!-- VIEW 2: MODO COMPARAÇÃO DIRETA (COMPARE VIEW) -->
+      <!-- VIEW 2: MODO COMPARAÇÃO DIRETA -->
       <section id="compare-view" class="view-mode">
         <div class="compare-viewport" id="canvas-host-compare">
           <div class="corner tl"></div>
@@ -102,7 +104,12 @@
             </div>
           </div>
 
-          <!-- Régua Métrica (apenas marcações visuais de piso) -->
+          <!-- Botão central para alternar posições dos carros -->
+          <button id="btn-switch-positions" class="btn-switch-positions interactive" title="Switch positions">
+            <img src="/src/assets/SwitchPositionsIcon.svg" alt="Switch" class="icon-switch" />
+          </button>
+
+          <!-- Régua métrica de piso -->
           <div class="metric-scale">
             <div class="ruler-ticks">
               <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
@@ -116,25 +123,31 @@
           <table class="compare-table">
             <thead>
               <tr>
-                <th class="col-attr">ATTRIBUTE</th>
                 <th id="th-car-1" class="col-c1">GEN4</th>
+                <th class="col-center">
+                  <div class="toggle-mode-group">
+                    <button id="tab-btn-attribute" class="toggle-btn">Attribute</button>
+                    <button id="tab-btn-difference" class="toggle-btn active">Difference</button>
+                  </div>
+                </th>
                 <th id="th-car-2" class="col-c2">KIA PV5 CARGO</th>
               </tr>
             </thead>
             <tbody id="compare-tbody"></tbody>
           </table>
 
-          <!-- Botões Swap em Mobile -->
-          <div class="mobile-swap-bar">
-            <button id="btn-swap-m1" class="btn-swap-mobile interactive">Swap</button>
-            <button id="btn-swap-m2" class="btn-swap-mobile interactive">Swap</button>
+          <!-- Ações em Mobile: Swap e Back to Garage agrupados -->
+          <div class="compare-actions-bar">
+            <div class="mobile-swap-bar">
+              <button id="btn-swap-m1" class="btn-swap-mobile interactive">Swap</button>
+              <button id="btn-swap-m2" class="btn-swap-mobile interactive">Swap</button>
+            </div>
+            <button id="btn-exit-compare" class="btn-exit-compare interactive">✕ Back to Garage</button>
           </div>
         </div>
-
-        <button id="btn-exit-compare" class="btn-exit-compare interactive">✕ Back to Garage</button>
       </section>
 
-      <!-- Triângulo Amarelo de Acabamento -->
+      <!-- Triângulo Amarelo de Fundo -->
       <div class="yellow-triangle"></div>
     </div>
 
