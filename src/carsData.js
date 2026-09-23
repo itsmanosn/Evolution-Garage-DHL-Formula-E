@@ -4,14 +4,23 @@ export const vehicles = [
     num: '01',
     name: 'GEN1',
     category: 'SEASON 1-4 RACE CAR',
+    dimensions: '5,000 x 1,780 x 1,050 mm',
+    lengthDesc: '5,000 mm long · true scale 1 px = 7.7 mm',
     modelPath: '/models/gen1.glb',
     specs: {
       power: '200 kW',
+      powerVal: 200,
       topSpeed: '225 km/h',
-      energy: '28 kWh battery',
+      speedVal: 225,
+      energy: '28 kWh',
+      energySub: 'battery',
+      energyVal: 28,
       acceleration: 'approx. 3.0 s',
+      accelVal: 3.0,
       regen: '150 kW',
-      weight: '900 kg'
+      regenVal: 150,
+      weight: '900 kg',
+      weightVal: 900
     }
   },
   {
@@ -19,29 +28,47 @@ export const vehicles = [
     num: '02',
     name: 'GEN2',
     category: 'SEASON 5-8 RACE CAR',
+    dimensions: '5,160 x 1,770 x 1,050 mm',
+    lengthDesc: '5,160 mm long · true scale 1 px = 7.7 mm',
     modelPath: '/models/gen2.glb',
     specs: {
       power: '250 kW',
+      powerVal: 250,
       topSpeed: '280 km/h',
-      energy: '54 kWh battery',
+      speedVal: 280,
+      energy: '54 kWh',
+      energySub: 'battery',
+      energyVal: 54,
       acceleration: '2.8 s',
+      accelVal: 2.8,
       regen: '250 kW',
-      weight: '903 kg'
+      regenVal: 250,
+      weight: '903 kg',
+      weightVal: 903
     }
   },
   {
     id: 'gen3',
     num: '03',
     name: 'GEN3',
-    category: 'SEASON 9-10 RACE CAR',
+    category: 'SEASON 9-10, 2022/23 TO 2023/24',
+    dimensions: '5,016 x 1,700 x 1,023 mm',
+    lengthDesc: '5,016 mm long · true scale 1 px = 7.7 mm',
     modelPath: '/models/gen3.glb',
     specs: {
       power: '350 kW',
+      powerVal: 350,
       topSpeed: '320 km/h',
-      energy: '47 kWh battery',
+      speedVal: 320,
+      energy: '47 kWh',
+      energySub: 'battery',
+      energyVal: 47,
       acceleration: 'approx. 2.0 s',
+      accelVal: 2.0,
       regen: '600 kW',
-      weight: '856 kg'
+      regenVal: 600,
+      weight: '856 kg',
+      weightVal: 856
     }
   },
   {
@@ -49,29 +76,47 @@ export const vehicles = [
     num: '04',
     name: 'GEN3 Evo',
     category: 'SEASON 11-12 RACE CAR',
+    dimensions: '5,016 x 1,700 x 1,023 mm',
+    lengthDesc: '5,016 mm long · true scale 1 px = 7.7 mm',
     modelPath: '/models/gen3evo.glb',
     specs: {
       power: '350 kW',
+      powerVal: 350,
       topSpeed: '322 km/h',
-      energy: '47 kWh battery',
+      speedVal: 322,
+      energy: '47 kWh',
+      energySub: 'battery',
+      energyVal: 47,
       acceleration: '1.86 s',
+      accelVal: 1.86,
       regen: '600 kW',
-      weight: '856 kg'
+      regenVal: 600,
+      weight: '856 kg',
+      weightVal: 856
     }
   },
   {
     id: 'gen4',
     num: '05',
     name: 'GEN4',
-    category: 'SEASON 13 RACE CAR',
+    category: 'SEASON 13, IN SERVICE FROM 2026/27',
+    dimensions: '5,540 x 1,790 x 1,113 mm',
+    lengthDesc: '5,540 mm long · true scale 1 px = 7.7 mm',
     modelPath: '/models/gen4.glb',
     specs: {
       power: '600 kW',
+      powerVal: 600,
       topSpeed: '335 km/h',
-      energy: '55 kWh race energy',
+      speedVal: 335,
+      energy: '55 kWh',
+      energySub: 'race energy',
+      energyVal: 55,
       acceleration: 'approx. 1.8 s',
+      accelVal: 1.8,
       regen: '700 kW',
-      weight: '950 kg'
+      regenVal: 700,
+      weight: '950 kg',
+      weightVal: 950
     }
   },
   {
@@ -79,14 +124,23 @@ export const vehicles = [
     num: '06',
     name: 'Kia PV5 Cargo L2H1',
     category: 'DHL DELIVERY FLEET',
+    dimensions: '4,695 x 1,895 x 1,923 mm',
+    lengthDesc: '4,695 mm long · true scale 1 px = 16.7 mm',
     modelPath: '/models/kiapv5.glb',
     specs: {
       power: '160 kW',
+      powerVal: 160,
       topSpeed: '135 km/h',
-      energy: '71.2 kWh battery',
+      speedVal: 135,
+      energy: '71.2 kWh',
+      energySub: 'battery',
+      energyVal: 71.2,
       acceleration: '12.5 s',
+      accelVal: 12.5,
       regen: 'not published',
-      weight: 'not published'
+      regenVal: null,
+      weight: 'not published',
+      weightVal: null
     }
   }
 ];
