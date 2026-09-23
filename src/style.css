@@ -1,34 +1,99 @@
+
+/* Fonts aqui...*/
+
+@font-face {
+  font-family: 'Delivery';
+  src: url('/src/assets/Delivery_W_Lt.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Delivery';
+  src: url('/src/assets/Delivery_W_Bd.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Delivery', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 300;
   user-select: none;
+}
+
+/* Fonts em Bold aqui...*/
+b, strong,
+h1, h2, h3,
+.view-meta h1,
+.cmp-title,
+.spec-val,
+.stats-header,
+.season-tag,
+.tab-num,
+.tab-name,
+.btn-compare-action,
+.btn-exit-compare,
+.compare-table th,
+.col-c1,
+.col-c2,
+.btn-swap,
+.btn-swap-mobile,
+.tray-label,
+.selector-header,
+.spec-title {
+  font-family: 'Delivery', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
 }
 
 :root {
   --yellow: #ffcc00;
-  --bg-dark: #0b0f19;
+  --dhl-red: #d40511;
+  --tech-blue: #5d80a8;       /* Exclusivo para nomes das descrições */
+  --text-muted: #8e9bb0;      /* Cinzento para dimensões e metadados */
+  --text-subtle: #64748b;     /* Cinzento suave para class max e slots vazios */
+  --bg-dark: #14141e;
   --card-bg: rgba(18, 24, 38, 0.94);
   --border-muted: rgba(255, 255, 255, 0.12);
 }
 
+/* Fundo Gradient aqui...*/
+
 body {
-  background-color: var(--bg-dark);
   color: #ffffff;
   overflow: hidden;
   width: 100vw;
   height: 100vh;
+  background: 
+    radial-gradient(110% 110% at 100% 100%, #ffcc002e, transparent 58%),
+    radial-gradient(100% 110% at 0 0, #5d80a857, transparent 62%),
+    #14141e;
 }
 
-/* Three.js fixo no fundo */
-#webgl {
+/* Canvas de Partículas Vanilla JS */
+#bg-particles {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Canvas 3D: Confinado ao container/frame */
+#webgl {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
   z-index: 1;
+  pointer-events: auto;
 }
 
 /* UI Container */
@@ -62,35 +127,47 @@ body {
   display: flex;
 }
 
-/* Top Bar */
+/* Top-bar e Logo...*/
+
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 38px;
-  margin-bottom: 6px;
+  min-height: 54px;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 30;
 }
 
 .logo-box {
-  background-color: var(--yellow);
-  color: #d40511;
-  padding: 6px 14px;
+  background: transparent;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 900;
-  font-style: italic;
-  font-size: 1rem;
+  z-index: 31;
 }
 
-.logo-fe { color: #0b0f19; font-size: 0.9rem; }
+.dhl-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 6px;
+}
+
+/* Pontinhos com fade da esquerda para a direita */
 
 .dot-matrix {
-  width: 200px;
-  height: 20px;
+  width: 240px;
+  height: 32px;
   background-image: radial-gradient(var(--yellow) 1.5px, transparent 1.5px);
   background-size: 8px 8px;
-  opacity: 0.7;
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 40%, rgba(0, 0, 0, 1) 100%);
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 40%, rgba(0, 0, 0, 1) 100%);
+  pointer-events: none;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 31;
 }
 
 /* Miras Amarelas dos Quadros */
@@ -100,15 +177,42 @@ body {
   height: 22px;
   border: 2px solid var(--yellow);
   pointer-events: none;
+  z-index: 6;
 }
 .corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
 .corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
 .corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
 .corner.br { bottom: 0; right: 0; border-left: none; border-top: none; }
 
-/* =============================================================
-   SINGLE VIEW (DESKTOP)
-============================================================= */
+/* Desc. in Blue*/
+
+.season-tag,
+.spec-title,
+.col-attr {
+  color: var(--tech-blue);
+}
+
+/* Secondary Texts in Gray color*/
+
+.dimension-tag,
+.tray-label,
+.scale-text {
+  color: var(--text-muted);
+}
+
+.spec-max {
+  color: var(--text-subtle);
+  font-size: 0.65rem;
+}
+
+.stats-counter,
+.selector-header span:last-child {
+  color: #e2e8f0;
+  font-size: 0.72rem;
+}
+
+/* Single View Desktop*/
+
 .showcase-area {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -117,7 +221,6 @@ body {
   height: 58vh;
 }
 
-/* Quadro do Carro 3D Individual */
 .view-frame {
   position: relative;
   height: 100%;
@@ -125,6 +228,10 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   padding: 16px 20px;
+  background: rgba(11, 15, 25, 0.45);
+  border: 1px solid rgba(255, 204, 0, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .view-meta {
@@ -135,13 +242,11 @@ body {
 .season-tag {
   font-size: 0.75rem;
   letter-spacing: 0.8px;
-  color: #8e9bb0;
-  font-weight: 600;
   text-transform: uppercase;
 }
 
 .view-meta h1 {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 900;
   color: var(--yellow);
   margin: 2px 0 4px 0;
@@ -150,28 +255,32 @@ body {
 
 .dimension-tag {
   font-size: 0.78rem;
-  color: #94a3b8;
 }
 
+/* Botões de navegação circulares cinzentos */
 .nav-arrow {
   position: absolute;
   top: 52%;
   transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  color: white;
-  width: 40px;
-  height: 40px;
+  color: #cfd6e0;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 0.2s;
+  transition: 0.2s ease;
   z-index: 10;
 }
-.nav-arrow:hover { background: rgba(255, 255, 255, 0.2); }
+.nav-arrow:hover { 
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
 .nav-arrow.left { left: 16px; }
 .nav-arrow.right { right: 16px; }
 
@@ -215,7 +324,6 @@ body {
 
 .spec-title {
   font-size: 0.72rem;
-  color: #8e9bb0;
 }
 
 .spec-val {
@@ -233,11 +341,6 @@ body {
 .spec-bar-fill {
   height: 100%;
   background: var(--yellow);
-}
-
-.spec-max {
-  font-size: 0.65rem;
-  color: #64748b;
 }
 
 .btn-compare-action {
@@ -267,7 +370,6 @@ body {
 
 .tray-label {
   font-size: 0.72rem;
-  color: #8e9bb0;
 }
 
 .tray-slots {
@@ -287,8 +389,17 @@ body {
   text-align: center;
   position: relative;
 }
-.slot.empty { border: 1px dashed rgba(255, 255, 255, 0.2); color: #64748b; }
-.slot.filled { background: #192233; border: 2px solid var(--yellow); color: white; font-weight: bold; }
+.slot.empty { 
+  border: 1px dashed rgba(255, 255, 255, 0.15); 
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-subtle);
+}
+.slot.filled { 
+  background: #192233; 
+  border: 2px solid var(--yellow); 
+  color: white; 
+  font-weight: bold; 
+}
 .slot .badge-remove {
   position: absolute;
   top: -6px;
@@ -307,10 +418,19 @@ body {
 
 .selector-wrapper { display: flex; flex-direction: column; gap: 6px; }
 .selector-header { display: flex; gap: 20px; font-size: 0.72rem; color: var(--yellow); font-weight: 700; }
-.vehicle-tabs { display: flex; gap: 8px; }
+
+/* Botoes de Vehicles com efeito de Glass e etc...*/
+
+.vehicle-tabs {
+  display: flex;
+  gap: 8px;
+}
+
 .vehicle-tab {
-  background: rgba(18, 24, 38, 0.85);
-  border: 1px solid var(--border-muted);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 6px;
   padding: 8px 12px;
   min-width: 82px;
@@ -319,8 +439,39 @@ body {
   flex-direction: column;
   gap: 2px;
   position: relative;
+  transition: all 0.25s ease;
 }
-.vehicle-tab.active { border-color: var(--yellow); }
+
+.vehicle-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.vehicle-tab .tab-num {
+  color: #ffffff !important;
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+.vehicle-tab .tab-name {
+  color: #ffffff !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.vehicle-tab.active { 
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--yellow) !important;
+  box-shadow: 0 0 14px rgba(255, 204, 0, 0.15);
+}
+
+.vehicle-tab.active .tab-num,
+.vehicle-tab.active .tab-name {
+  color: #ffffff !important;
+  opacity: 1;
+}
+
 .vehicle-tab.active::before {
   content: '▼';
   position: absolute;
@@ -330,6 +481,7 @@ body {
   color: var(--yellow);
   font-size: 0.6rem;
 }
+
 .vehicle-tab .slot-badge {
   position: absolute;
   top: -6px;
@@ -346,9 +498,8 @@ body {
   justify-content: center;
 }
 
-/* =============================================================
-   COMPARE VIEW
-============================================================= */
+/* Comparing view..*/
+
 #compare-view {
   display: none;
   flex-direction: column;
@@ -366,6 +517,10 @@ body {
   flex-direction: column;
   justify-content: space-between;
   padding: 16px 24px;
+  background: rgba(11, 15, 25, 0.45);
+  border: 1px solid rgba(255, 204, 0, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .compare-top-info {
@@ -393,29 +548,49 @@ body {
   line-height: 1.1;
 }
 
-.btn-swap {
-  background: transparent;
+/* Bts de action unificados compare, swap & & Back to garage*/
+
+.btn-swap,
+.btn-exit-compare,
+.btn-swap-mobile {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  padding: 6px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 8px 22px;
   border-radius: 20px;
+  font-family: 'Delivery', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
-}
-.btn-swap:hover {
-  border-color: var(--yellow);
-  color: var(--yellow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
 }
 
-/* Régua métrica de solo */
+.btn-swap:hover,
+.btn-exit-compare:hover,
+.btn-swap-mobile:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.15);
+}
+
+.btn-exit-compare {
+  align-self: flex-start;
+  margin-bottom: 6px;
+}
+
 .metric-scale {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   padding-bottom: 6px;
   z-index: 5;
 }
@@ -424,17 +599,15 @@ body {
   width: 90%;
   display: flex;
   justify-content: space-between;
-  color: #64748b;
+  color: var(--text-subtle);
   font-size: 0.8rem;
   margin-bottom: 2px;
 }
 
 .scale-text {
   font-size: 0.72rem;
-  color: #8e9bb0;
 }
 
-/* Tabela Comparativa */
 .compare-table-container {
   width: 100%;
   max-width: 920px;
@@ -458,31 +631,13 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.col-attr { text-align: left; color: #8e9bb0; width: 30%; font-size: 0.84rem; }
+.col-attr { text-align: left; width: 30%; font-size: 0.84rem; }
 .col-c1 { text-align: left; font-weight: 800; font-size: 1.15rem; width: 35%; color: #fff; }
 .col-c2 { text-align: left; font-weight: 800; font-size: 1.15rem; width: 35%; color: #fff; }
-.val-muted { color: #64748b; font-weight: 500; }
+.val-muted { font-weight: 500; opacity: 0.65; }
 
 .mobile-swap-bar { display: none; }
 
-.btn-exit-compare {
-  align-self: flex-start;
-  background: #192233;
-  border: 1px solid var(--border-muted);
-  color: #fff;
-  padding: 8px 18px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: bold;
-  transition: 0.2s;
-  margin-bottom: 6px;
-}
-.btn-exit-compare:hover {
-  background: #25334c;
-}
-
-/* Triângulo Amarelo */
 .yellow-triangle {
   position: fixed;
   bottom: 0;
@@ -495,9 +650,8 @@ body {
   pointer-events: none;
 }
 
-/* =============================================================
-   RESPONSIVIDADE: MOBILE (AJUSTE FINO DE TAMANHOS E FRAME)
-============================================================= */
+/* Mobile version - Responsibility*/
+
 @media (max-width: 900px) {
   body {
     overflow-y: auto;
@@ -511,7 +665,6 @@ body {
     pointer-events: auto;
   }
 
-  /* Single View no mobile */
   .showcase-area {
     grid-template-columns: 1fr;
     height: auto;
@@ -519,28 +672,16 @@ body {
   }
 
   .view-frame {
-    height: 220px;
+    height: 240px;
     padding: 10px 12px;
   }
 
-  .view-meta h1 {
-    font-size: 1.35rem;
-    margin: 2px 0;
-  }
-
+  .view-meta h1 { font-size: 1.35rem; margin: 2px 0; }
   .view-meta .season-tag { font-size: 0.65rem; }
   .view-meta .dimension-tag { font-size: 0.68rem; }
 
-  .nav-arrow {
-    width: 32px;
-    height: 32px;
-    font-size: 0.9rem;
-  }
-
-  .stats-panel {
-    padding: 16px;
-    gap: 10px;
-  }
+  .nav-arrow { width: 32px; height: 32px; font-size: 0.9rem; }
+  .stats-panel { padding: 16px; gap: 10px; }
 
   .bottom-bar {
     flex-direction: column;
@@ -554,32 +695,20 @@ body {
     padding-bottom: 6px;
   }
 
-  /* Compare View Mobile */
   #compare-view {
     height: auto;
     min-height: calc(100vh - 60px);
   }
 
   .compare-viewport {
-    height: 210px;
+    height: 220px;
     padding: 10px 8px;
   }
 
-  .cmp-title {
-    font-size: 1.15rem;
-  }
+  .cmp-title { font-size: 1.15rem; }
+  .btn-swap { display: none; }
 
-  .btn-swap {
-    display: none;
-  }
-
-  /* Corrige a ordem das 3 colunas no Mobile: C1 | ATTRIBUTE | C2 */
-  .compare-table thead tr {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-  }
-
+  .compare-table thead tr,
   .compare-table tbody tr {
     display: flex;
     justify-content: space-between;
@@ -592,50 +721,29 @@ body {
     border: none;
   }
 
-  /* Reordena: Coluna 1 na esquerda, Attribute no centro, Coluna 2 na direita */
-  .col-c1 {
-    order: 1;
-    font-size: 0.95rem;
-    text-align: left;
-    width: 32%;
-  }
+  .col-c1 { order: 1; font-size: 0.95rem; text-align: left; width: 32%; }
+  .col-attr { order: 2; font-size: 0.72rem; text-align: center; width: 36%; }
+  .col-c2 { order: 3; font-size: 0.95rem; text-align: right; width: 32%; }
 
-  .col-attr {
-    order: 2;
-    font-size: 0.72rem;
-    text-align: center;
-    width: 36%;
-    color: #8e9bb0;
-  }
-
-  .col-c2 {
-    order: 3;
-    font-size: 0.95rem;
-    text-align: right;
-    width: 32%;
-  }
-
-  .mobile-swap-bar {
-    display: flex;
-    gap: 12px;
-    margin: 16px 0 10px 0;
+  .mobile-swap-bar { 
+    display: flex; 
+    gap: 12px; 
+    margin: 16px 0 10px 0; 
   }
 
   .btn-swap-mobile {
     flex: 1;
-    background: transparent;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.35);
     padding: 12px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 700;
+    border-radius: 24px;
+    font-size: 0.88rem;
   }
 
   .btn-exit-compare {
     width: 100%;
     margin-top: 10px;
     padding: 12px;
+    border-radius: 24px;
+    font-size: 0.88rem;
     text-align: center;
   }
 
