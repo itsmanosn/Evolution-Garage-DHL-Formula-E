@@ -6,24 +6,27 @@
     <title>Evolution Garage - DHL x Formula E</title>
   </head>
   <body>
-    <canvas id="webgl"></canvas>
+    <!-- Fundo de partículas em tela cheia -->
+    <canvas id="bg-particles"></canvas>
 
     <div id="ui-container">
-      <!-- Barra Superior -->
+      <!-- Barra Superior com o logótipo oficial PNG -->
       <header class="top-bar">
         <div class="logo-box">
-          <span class="logo-dhl">DHL</span>
-          <span class="logo-fe">FORMULA E</span>
+          <img 
+            src="/src/assets/dhl x formula e logo.png" 
+            alt="DHL x Formula E Official Founding & Logistics Partner" 
+            class="dhl-logo-img"
+          />
         </div>
         <div class="dot-matrix"></div>
       </header>
 
-      <!-- ==============================================
-           VIEW 1: MODO SELEÇÃO INDIVIDUAL (DEFAULT)
-      =============================================== -->
+      <!-- VIEW 1: MODO SELEÇÃO INDIVIDUAL (DEFAULT) -->
+       
       <section id="single-view" class="view-mode active">
         <div class="showcase-area">
-          <div class="view-frame">
+          <div class="view-frame" id="canvas-host-single">
             <div class="corner tl"></div>
             <div class="corner tr"></div>
             <div class="corner bl"></div>
@@ -32,8 +35,10 @@
             <div class="view-meta">
               <span id="car-season" class="season-tag">SEASON 13, IN SERVICE FROM 2026/27</span>
               <h1 id="car-title">GEN4</h1>
-              <p id="car-dimensions" class="dimension-tag">5,540 mm long · true scale 1 px = 7.7 mm</p>
             </div>
+
+            <!-- Canvas Three.js confinado dentro do frame -->
+            <canvas id="webgl"></canvas>
 
             <button id="btn-prev" class="nav-arrow left interactive">&lt;</button>
             <button id="btn-next" class="nav-arrow right interactive">&gt;</button>
@@ -70,12 +75,9 @@
         </footer>
       </section>
 
-      <!-- ==============================================
-           VIEW 2: MODO COMPARAÇÃO DIRETA (COMPARE VIEW)
-      =============================================== -->
+      <!-- VIEW 2: MODO COMPARAÇÃO DIRETA (COMPARE VIEW) -->
       <section id="compare-view" class="view-mode">
-        <!-- Viewport com as miras e os dois carros -->
-        <div class="compare-viewport">
+        <div class="compare-viewport" id="canvas-host-compare">
           <div class="corner tl"></div>
           <div class="corner tr"></div>
           <div class="corner bl"></div>
@@ -83,34 +85,29 @@
 
           <!-- Metas Superiores Lado a Lado -->
           <div class="compare-top-info">
-            <!-- Carro 1 -->
             <div class="compare-card-meta">
               <div class="meta-texts">
                 <span id="cmp-cat-1" class="season-tag">SEASON 13 RACE CAR</span>
                 <h2 id="cmp-title-1" class="cmp-title">GEN4</h2>
-                <p id="cmp-dim-1" class="dimension-tag">5,540 x 1,790 x 1,113 mm</p>
               </div>
               <button id="btn-swap-1" class="btn-swap interactive">Swap</button>
             </div>
 
-            <!-- Carro 2 -->
             <div class="compare-card-meta right">
               <div class="meta-texts">
                 <span id="cmp-cat-2" class="season-tag">DHL DELIVERY FLEET</span>
                 <h2 id="cmp-title-2" class="cmp-title">Kia PV5 Cargo L2H1</h2>
-                <p id="cmp-dim-2" class="dimension-tag">4,695 x 1,895 x 1,923 mm</p>
               </div>
               <button id="btn-swap-2" class="btn-swap interactive">Swap</button>
             </div>
           </div>
 
-          <!-- Régua Métrica de Solo -->
+          <!-- Régua Métrica (apenas marcações visuais de piso) -->
           <div class="metric-scale">
             <div class="ruler-ticks">
               <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
               <span>|</span><span>|</span><span>|</span><span>|</span><span>|</span>
             </div>
-            <span class="scale-text">1 m grid · 1 m = 88 px · 1 px = 11.4 mm · both vehicles drawn from the same factor, nothing normalised</span>
           </div>
         </div>
 
@@ -124,9 +121,7 @@
                 <th id="th-car-2" class="col-c2">KIA PV5 CARGO</th>
               </tr>
             </thead>
-            <tbody id="compare-tbody">
-              <!-- Injetado via JS -->
-            </tbody>
+            <tbody id="compare-tbody"></tbody>
           </table>
 
           <!-- Botões Swap em Mobile -->
@@ -139,7 +134,7 @@
         <button id="btn-exit-compare" class="btn-exit-compare interactive">✕ Back to Garage</button>
       </section>
 
-      <!-- Triângulo Amarelo -->
+      <!-- Triângulo Amarelo de Acabamento -->
       <div class="yellow-triangle"></div>
     </div>
 

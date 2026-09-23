@@ -1,11 +1,23 @@
 import './style.css';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { vehicles } from './carsData.js';
+import { initBackgroundParticles } from './particles.js';
+
+// Inicializa o fundo dinâmico de partículas em Vanilla JS
+initBackgroundParticles();
 
 // ESTADO GLOBAL
 let currentMode = 'single'; // 'single' ou 'compare'
 let currentIndex = 4; // GEN4 por padrão
 let compareTray = []; // Veículos selecionados (máx 2)
+
+// Contentores do Canvas
+const hostSingle = document.querySelector('#canvas-host-single');
+const hostCompare = document.querySelector('#canvas-host-compare');
 
 // ELEMENTOS DO DOM - VIEWS
 const singleView = document.querySelector('#single-view');
@@ -14,7 +26,6 @@ const compareView = document.querySelector('#compare-view');
 // ELEMENTOS - SINGLE VIEW
 const carSeason = document.querySelector('#car-season');
 const carTitle = document.querySelector('#car-title');
-const carDimensions = document.querySelector('#car-dimensions');
 const statsCarName = document.querySelector('#stats-car-name');
 const statsIndex = document.querySelector('#stats-index');
 const specsList = document.querySelector('#specs-list');
@@ -30,12 +41,10 @@ const btnNext = document.querySelector('#btn-next');
 // ELEMENTOS - COMPARE VIEW
 const cmpCat1 = document.querySelector('#cmp-cat-1');
 const cmpTitle1 = document.querySelector('#cmp-title-1');
-const cmpDim1 = document.querySelector('#cmp-dim-1');
 const thCar1 = document.querySelector('#th-car-1');
 
 const cmpCat2 = document.querySelector('#cmp-cat-2');
 const cmpTitle2 = document.querySelector('#cmp-title-2');
-const cmpDim2 = document.querySelector('#cmp-dim-2');
 const thCar2 = document.querySelector('#th-car-2');
 
 const compareTbody = document.querySelector('#compare-tbody');
@@ -45,63 +54,196 @@ const btnSwap2 = document.querySelector('#btn-swap-2');
 const btnSwapM1 = document.querySelector('#btn-swap-m1');
 const btnSwapM2 = document.querySelector('#btn-swap-m2');
 
-// -------------------------------------------------------------
-// THREE.JS SETUP COM CÂMERA ELEVADA
-// -------------------------------------------------------------
+// THREE.JS SETUP CONFINADO AO CONTAINER //
+
 const canvas = document.querySelector('#webgl');
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-
-function adjustCamera() {
-  const isMobile = window.innerWidth <= 900;
-  if (isMobile) {
-    camera.position.set(0, 1.85, 6.2);
-    camera.lookAt(0, 1.35, 0);
-  } else {
-    // No desktop desloca levemente à esquerda para alinhar com o viewport 3D
-    camera.position.set(-0.7, 1.35, 5.2);
-    camera.lookAt(-0.7, 0.9, 0);
-  }
+function getActiveContainer() {
+  return currentMode === 'single' ? hostSingle : hostCompare;
 }
-adjustCamera();
+
+const activeHost = getActiveContainer();
+const initWidth = activeHost?.clientWidth || window.innerWidth;
+const initHeight = activeHost?.clientHeight || 400;
+
+// Câmera teleobjetiva (FOV 24°) para eliminar distorções de perspectiva nas extremidades
+const camera = new THREE.PerspectiveCamera(24, initWidth / initHeight, 0.1, 100);
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(initWidth, initHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
 
-// Luzes
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+// Luz ambiente neutra omnidirecional em branco puro para iluminar todas as faces
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
 scene.add(ambientLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.3);
+// Luz direcional principal limpa vinda de cima e da frente
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.8);
 dirLight.position.set(5, 12, 8);
 scene.add(dirLight);
 
-// Cubo 1 (Carro Principal)
-const geom1 = new THREE.BoxGeometry(1, 1, 1);
-const mat1 = new THREE.MeshStandardMaterial({ color: vehicles[currentIndex].color });
-const mesh1 = new THREE.Mesh(geom1, mat1);
-scene.add(mesh1);
+// Luz secundária frontal suave para eliminar sombras duras na carroceria
+const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
+frontLight.position.set(-5, 4, 6);
+scene.add(frontLight);
 
-// Cubo 2 (Segundo Carro na Comparação)
-const geom2 = new THREE.BoxGeometry(1, 1, 1);
-const mat2 = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
-const mesh2 = new THREE.Mesh(geom2, mat2);
-scene.add(mesh2);
+// PÓS-PROCESSAMENTO: SHADER DE ABERRAÇÃO CROMÁTICA// 
+
+const ChromaticAberrationShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    amount: { value: 0.0022 } // Dispersão óptica suave que preserva a nitidez no centro
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    uniform float amount;
+    varying vec2 vUv;
+
+    void main() {
+      vec2 offset = (vUv - 0.5) * amount;
+      float r = texture2D(tDiffuse, vUv + offset).r;
+      float g = texture2D(tDiffuse, vUv).g;
+      float b = texture2D(tDiffuse, vUv - offset).b;
+      float a = texture2D(tDiffuse, vUv).a;
+      gl_FragColor = vec4(r, g, b, a);
+    }
+  `
+};
+
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const chromaticAberrationPass = new ShaderPass(ChromaticAberrationShader);
+composer.addPass(chromaticAberrationPass);
+
+// -------------------------------------------------------------
+// SISTEMA DE GRUPOS & CARREGAMENTO GLTF
+// -------------------------------------------------------------
+const carGroup1 = new THREE.Group();
+const carGroup2 = new THREE.Group();
+scene.add(carGroup1);
+scene.add(carGroup2);
+
+const gltfLoader = new GLTFLoader();
+const modelCache = {};
+
+async function loadVehicleModel(vehicle) {
+  if (modelCache[vehicle.id]) {
+    return modelCache[vehicle.id].clone();
+  }
+
+  return new Promise((resolve) => {
+    gltfLoader.load(
+      vehicle.modelPath,
+      (gltf) => {
+        const root = gltf.scene;
+
+        // Auto-centralização pelo BoundingBox (alinhando com o piso y = 0)
+        const box = new THREE.Box3().setFromObject(root);
+        const center = box.getCenter(new THREE.Vector3());
+        root.position.x -= center.x;
+        root.position.z -= center.z;
+        root.position.y -= box.min.y;
+        
+        const MODEL_SCALE = 0.75;
+        root.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
+
+        root.traverse((node) => {
+          if (node.isMesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+          }
+        });
+
+        modelCache[vehicle.id] = root;
+        resolve(root.clone());
+      },
+      undefined,
+      (err) => {
+        console.warn(`Não foi possível carregar ${vehicle.modelPath}. Usando fallback temporário.`, err);
+        // Fallback procedural temporário enquanto os .glb estão sendo gerados no Blender
+        const fallbackGeom = new THREE.BoxGeometry(2.2, 0.6, 1.1);
+        const fallbackMat = new THREE.MeshStandardMaterial({
+          color: 0xffcc00,
+          roughness: 0.35,
+          metalness: 0.7
+        });
+        const fallbackMesh = new THREE.Mesh(fallbackGeom, fallbackMat);
+        resolve(fallbackMesh);
+      }
+    );
+  });
+}
+
+// Cálculo do plano Z=0 para ancorar os modelos aos lados proporcionalmente
+function getVisibleWidthAtZ0() {
+  const fovInRad = (camera.fov * Math.PI) / 180;
+  const visibleHeight = 2 * Math.tan(fovInRad / 2) * camera.position.z;
+  return visibleHeight * camera.aspect;
+}
+
+function updateCompareCarPositions() {
+  if (currentMode !== 'compare') return;
+
+  const visibleWidth = getVisibleWidthAtZ0();
+  const isMobile = window.innerWidth <= 900;
+  const sideRatio = isMobile ? 0.22 : 0.25;
+  const separation = visibleWidth * sideRatio;
+
+  carGroup1.position.set(-separation, -0.3, 0);
+  carGroup2.position.set(separation, -0.3, 0);
+}
+
+function updateCanvasSizeAndCamera() {
+  const container = getActiveContainer();
+  if (!container) return;
+
+  if (canvas.parentElement !== container) {
+    container.appendChild(canvas);
+  }
+
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  composer.setSize(width, height);
+
+  if (currentMode === 'single') {
+    camera.position.set(0, 1.1, 8.5);
+    camera.lookAt(0, 0, 0);
+  } else {
+    camera.position.set(0, 1.4, 11.2);
+    camera.lookAt(0, 0.05, 0);
+    updateCompareCarPositions();
+  }
+}
 
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  adjustCamera();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  if (currentMode === 'single') updateSingleUI();
-  else enterCompareView();
+  updateCanvasSizeAndCamera();
+  if (currentMode === 'single') {
+    updateSingleUI();
+  } else {
+    updateCompareCarPositions();
+  }
 });
 
-// -------------------------------------------------------------
-// SINGLE VIEW LOGIC
-// -------------------------------------------------------------
+// SINGLE VIEW LOGIC //
+
 function renderTabs() {
   vehicleTabsContainer.innerHTML = '';
   vehicles.forEach((car, index) => {
@@ -175,12 +317,11 @@ function updateTraySlots() {
   });
 }
 
-function updateSingleUI() {
+async function updateSingleUI() {
   const currentCar = vehicles[currentIndex];
 
   carSeason.textContent = currentCar.category;
   carTitle.textContent = currentCar.name;
-  carDimensions.textContent = `${currentCar.dimensions} · true scale 1 px = 7.7 mm`;
   statsCarName.textContent = currentCar.name;
   statsIndex.textContent = `${currentCar.num} / 06`;
   selectorIndex.textContent = `${currentCar.num} / 06`;
@@ -200,21 +341,23 @@ function updateSingleUI() {
     btnAddCompare.style.color = '#0b0f19';
   }
 
-  // Posicionamento no frame 3D
-  const isMobile = window.innerWidth <= 900;
-  const posX = isMobile ? 0 : -0.7;
-  const posY = isMobile ? 1.35 : 0.9;
+  // Carrega e substitui o modelo no container 1
+  const model = await loadVehicleModel(currentCar);
+  carGroup1.clear();
+  carGroup1.add(model);
+  carGroup1.position.set(0, -0.3, 0);
+  carGroup1.visible = true;
 
-  mesh1.position.set(posX, posY, 0);
-  mesh1.scale.set(currentCar.scale.x * 0.85, currentCar.scale.y * 0.85, currentCar.scale.z * 0.85);
-  mat1.color.setHex(currentCar.color);
-  mat2.opacity = 0;
+  // Esconde o slot 2 na visualização única
+  carGroup2.visible = false;
+  carGroup2.clear();
+
+  updateCanvasSizeAndCamera();
 }
 
-// -------------------------------------------------------------
-// COMPARE VIEW LOGIC
-// -------------------------------------------------------------
-function enterCompareView() {
+// COMPARE VIEW LOGIC //
+
+async function enterCompareView() {
   currentMode = 'compare';
   singleView.classList.remove('active');
   compareView.classList.add('active');
@@ -224,12 +367,10 @@ function enterCompareView() {
 
   cmpCat1.textContent = carA.category;
   cmpTitle1.textContent = carA.name;
-  cmpDim1.textContent = carA.dimensions;
   thCar1.textContent = carA.name.toUpperCase();
 
   cmpCat2.textContent = carB.category;
   cmpTitle2.textContent = carB.name;
-  cmpDim2.textContent = carB.dimensions;
   thCar2.textContent = carB.name.toUpperCase();
 
   const rows = [
@@ -252,41 +393,54 @@ function enterCompareView() {
     compareTbody.appendChild(tr);
   });
 
-  const isMobile = window.innerWidth <= 900;
-  const posY = isMobile ? 1.35 : 0.95; // Acima da régua métrica
-  const separation = isMobile ? 1.25 : 1.75;
+  updateCanvasSizeAndCamera();
 
-  // Carro 1 (esquerda)
-  mesh1.position.set(-separation, posY, 0);
-  mesh1.scale.set(carA.scale.x * 0.75, carA.scale.y * 0.75, carA.scale.z * 0.75);
-  mat1.color.setHex(carA.color);
+  // Carrega simultaneamente ambos os veículos para evitar atrasos na troca
+  const [modelA, modelB] = await Promise.all([
+    loadVehicleModel(carA),
+    loadVehicleModel(carB)
+  ]);
 
-  // Carro 2 (direita)
-  mesh2.position.set(separation, posY, 0);
-  mesh2.scale.set(carB.scale.x * 0.75, carB.scale.y * 0.75, carB.scale.z * 0.75);
-  mat2.color.setHex(carB.color);
-  mat2.opacity = 1;
+  carGroup1.clear();
+  carGroup1.add(modelA);
+  carGroup1.visible = true;
+
+  carGroup2.clear();
+  carGroup2.add(modelB);
+  carGroup2.visible = true;
+
+  updateCompareCarPositions();
 }
 
 function exitCompareView() {
   currentMode = 'single';
-  compareTray = []; // Reseta a bandeja para evitar bugs
+  compareTray = [];
   compareView.classList.remove('active');
   singleView.classList.add('active');
   updateSingleUI();
 }
 
 function swapVehicle(slotIndex) {
-  const nextCar = vehicles.find((v) => !compareTray.some((c) => c.id === v.id));
-  if (nextCar) {
-    compareTray[slotIndex] = nextCar;
-    enterCompareView();
+  const otherSlotIndex = slotIndex === 0 ? 1 : 0;
+  const currentOtherCar = compareTray[otherSlotIndex];
+  const currentThisCar = compareTray[slotIndex];
+
+  const currentVehicleIdx = vehicles.findIndex((v) => v.id === currentThisCar.id);
+
+  for (let step = 1; step < vehicles.length; step++) {
+    const nextIdx = (currentVehicleIdx + step) % vehicles.length;
+    const candidateCar = vehicles[nextIdx];
+
+    if (!currentOtherCar || candidateCar.id !== currentOtherCar.id) {
+      compareTray[slotIndex] = candidateCar;
+      enterCompareView();
+      break;
+    }
   }
 }
 
-// -------------------------------------------------------------
-// LISTENERS & ANIMATION
-// -------------------------------------------------------------
+//EVENTOS & LOOP DE RENDERIZAÇÃO//
+
 btnAddCompare.addEventListener('click', () => {
   const currentCar = vehicles[currentIndex];
   const alreadyIn = compareTray.find((c) => c.id === currentCar.id);
@@ -319,13 +473,19 @@ btnExitCompare.addEventListener('click', exitCompareView);
 
 function animate() {
   requestAnimationFrame(animate);
-  mesh1.rotation.y += 0.008;
-  if (mat2.opacity > 0) {
-    mesh2.rotation.y += 0.008;
+
+  // Rotação sutil contínua dos modelos para visualização 360° fluida
+  if (carGroup1.visible) {
+    carGroup1.rotation.y += 0.005;
   }
-  renderer.render(scene, camera);
+  if (carGroup2.visible) {
+    carGroup2.rotation.y += 0.005;
+  }
+
+  // Renderização através do composer com aberração cromática
+  composer.render();
 }
 
-// Inicia
+// Inicializa a cena
 updateSingleUI();
 animate();
